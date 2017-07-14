@@ -2,6 +2,7 @@
 #include <random> 
 #include <iostream>
 void printt(int*temp);
+int iTest = 0;//测试
 //最新修改：用户方位信息更新错误，AI稳赢（整除错误）
 MonteCarloSearchEngine::MonteCarloSearchEngine()
 {
@@ -203,7 +204,7 @@ void printt(int*temp) {
 //开始搜索
 void MonteCarloSearchEngine::SearchAGoodMove(Ddz *pDdz)
 {
-
+	iTest = 0;
 	pRealDdz = pDdz;	
 	//初始化各种值
 
@@ -226,11 +227,14 @@ void MonteCarloSearchEngine::SearchAGoodMove(Ddz *pDdz)
 	{	
 		memcpy(ibestMove, pMyDdzBoard->iPlaArr[0], sizeof(ibestMove));
 
-	/*	for (int i = 0; pMyDdzBoard->iPlaArr[i][0]!=-1; i++)
+		if (iTest == 0) {
+		for (int i = 0; pMyDdzBoard->iPlaArr[i][0]!=-1; i++)
 		{
 			cout << "只有一个可行解 ";
 			printt(pMyDdzBoard->iPlaArr[i]);
-		}*/
+		}
+		iTest++;
+		}
 		return;
 	}
 
@@ -243,12 +247,15 @@ void MonteCarloSearchEngine::SearchAGoodMove(Ddz *pDdz)
 		//多种出牌可行解集（各出牌解由牌编号升序组成-1间隔,-2收尾）//PASS首项为-3；//pass为-2-1;
 	{
 
-	/*	cout << " 可行解为";
-		for (int i = 0; pMyDdzBoard->iPlaArr[i][0] != -1; i++)
-		{
-		
-			printt(pMyDdzBoard->iPlaArr[i]);
-		}*/
+		if (iTest == 0) {
+			cout << " 可行解为";
+			for (int i = 0; pMyDdzBoard->iPlaArr[i][0] != -1; i++)
+			{
+
+				printt(pMyDdzBoard->iPlaArr[i]);
+			}
+			iTest++;
+		}
 		
 		
 

@@ -98,15 +98,15 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 		out[53] = temp[0];
 
 
-	/*	for (int i = 0; i < 54; i++)
+		/*for (int i = 0; i < 54; i++)
 		{
 			out[i] = i;
 		}
 		out[3] = 52;
 		out[4] = 53;
 		out[11] = 51;
-		out[12] = 50;*/
-
+		out[12] = 50;
+		*/
 		int us[21];//我们的牌
 		int latter[21];//下家的牌
 		int former[21];//上家的牌
