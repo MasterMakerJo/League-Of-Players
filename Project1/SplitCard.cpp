@@ -633,7 +633,7 @@ void SplitCard::judgeThree()
 //判断三顺
 void SplitCard::judgeLinkThree()
 {
-	/*judgeThree();
+	judgeThree();
 	int iIndex = 0;
 
 	int iLinkIndex[8];//记录相领的三条在iLinkThree数组的下标；
@@ -682,18 +682,18 @@ void SplitCard::judgeLinkThree()
 	{
 		if (iLinkIndex[i] != -2)
 		{
-			iLinkThree[iIndex++] = iThree[iLinkThree[i]];
-			iLinkThree[iIndex++] = iThree[iLinkThree[i]+1];
-			iLinkThree[iIndex++] = iThree[iLinkThree[i]+2];
+			iLinkThree[iIndex++] = iThree[iLinkIndex[i]];
+			iLinkThree[iIndex++] = iThree[iLinkIndex[i]+1];
+			iLinkThree[iIndex++] = iThree[iLinkIndex[i]+2];
 		}
 		else if (iLinkIndex[i] == -2)
 		{
 			iLinkThree[iIndex++] = -2;
 		}
-	}*/
+	}
 
 	
-	int iIndex = 0;
+	/*int iIndex = 0;
 	int iThreeValue = 0;
 	int iLastWaitOrderIndex = -1;
 
@@ -745,7 +745,7 @@ void SplitCard::judgeLinkThree()
 			iLinkThree[iIndex] = -2;
 			iIndex++;
 		}
-	}
+	}*/
 	iLinkThree[iIndex] = -1;
 }
 

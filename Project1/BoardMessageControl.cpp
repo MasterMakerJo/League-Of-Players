@@ -105,8 +105,16 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 		out[3] = 52;
 		out[4] = 53;
 		out[11] = 51;
-		out[12] = 50;
-		*/
+		out[12] = 50;*/
+
+
+		/*333 444 5 666 777 888 9
+		int us[21] = {0,1,2,4,5,6,8,12,13,14,16,17,18,20,21,29,24,-1,-1,-1,-1};//我们的牌
+		
+		out[51] = 50;
+		out[52] = 51;
+		out[53] = 52;*/
+
 		int us[21];//我们的牌
 		int latter[21];//下家的牌
 		int former[21];//上家的牌
@@ -156,7 +164,7 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 			}
 		}
 
-
+	
 		
 
 
@@ -361,15 +369,7 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 			}
 			cout << endl << endl;
 			}
-		/*int buffer[35];
-		for (int i = 0; i < 34; i++)
-		{
-		buffer[i] = out[i + 17];
-		}
-
-		PokerModelAnalysis pPoker;
-		pPoker.Gailvbiao(buffer);
-		*/
+		
 
 		while (pDdz->iStatus != 0)
 		{
