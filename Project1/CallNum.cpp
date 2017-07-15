@@ -3,6 +3,7 @@
 CallNum::CallNum()
 {
 	CInfo = CardsInfo::Instance();
+	pSplitCards = new SplitCard();
 }
 
 CallNum::~CallNum()
@@ -19,15 +20,11 @@ CallNum* CallNum::Instance()
 
 
 //牌力判断函数
-//作者：刘云志
-//时间：2016.4.1.13:11
-//第一次修改：2016.7.12.17:13 逻辑修改
-//第二次修改：2016.7.13.12:37 代码机构修改
-//第三次修改：2016.7.16.15:04 修正牌型分析BUG
-//第四次修改：2016.8.13.13:45 增加火箭追计4个牌力
-//第五次修改：2016.8.15.15:53 取消火箭追计4个牌力
+//
 int CallNum::CardForce(int iCards[])
 {
+
+	
 	int iMyCards[18] = { 0 };//手牌牌型
 
 	//偶数为牌的大小，奇数为该牌的数量
@@ -49,9 +46,23 @@ int CallNum::CardForce(int iCards[])
 
 	bool bLock = true;//锁机制
 
+
+	int*single = pSplitCards->startSplitCard(iCards, 7);
+
+	for (int i = 0; single[i] != -1; i++)
+	{
+		if (single[i] != -2&&single[i]<44)
+		{
+			iSingle++;
+		}
+	}
+
+
+
 	//整理牌型，转换为实际点数，并计数进手张
 	for (int i = 0; i < 17; i++)
 	{
+	
 		if (iCards[i] / 4 == 0)
 			iMyCards[i] = 3;    //3
 		if (iCards[i] / 4 == 1)
@@ -107,18 +118,13 @@ int CallNum::CardForce(int iCards[])
 		else
 		{
 			j += 2;
-			///3～K才算单牌
-			if (iMyCards[i] != iMyCards[i - 1] && iMyCards[i] != iMyCards[i + 1] && iMyCards[i] < 14)
-			{
-				iSingle++;
-			}
 		}
 	}
 
 
 	//第二次筛选
 	for (int i = 1, j = 0, k = 0, l = 0; i < 26; i += 2)
-	{	///炸弹计数j 对子计数k，三带一计数l
+	{	//炸弹计数j 对子计数k，三带一计数l
 		//炸弹的计算
 		if (iRepeat[i] == 4)
 		{
@@ -143,9 +149,6 @@ int CallNum::CardForce(int iCards[])
 	//顺子的第一次筛选
 	for (int i = 0, j = 0; i < 17; i++)
 	{	
-		///下标 0 1 2 3 4  5 6 7 8 9  10 11 12 13 14 15 16
-		///牌   3 3 3 4 5  5 6 7 9 10 J  Q  K  A  2  2  2   iOrder[18]={0} iMyCards[18] = { 0 }
-		///牌   4 6 7 9 10 J J J J Q  Q  Q  K  A  2  2  2
 		if (iMyCards[i ] + 1 == iMyCards[i + 1])
 		{	
 			iOrder[j] = iMyCards[i];    ///如果两张相邻的牌递增，这里只记录了前一张
@@ -176,7 +179,7 @@ int CallNum::CardForce(int iCards[])
 			{
 				iStraight[j] = iOrder[i];
 				j++;
-				bLock = false;
+				bLock = false;	
 			}
 		}
 		else
@@ -206,6 +209,43 @@ int CallNum::CardForce(int iCards[])
 	}
 
 
+
+/*	//单牌的计算 (顺子中的单牌不算，大于等于A的单牌不算) 
+	for (int i = 0; i < 17; i++)
+	{
+		if (iMyCards[i] != iMyCards[i - 1] && iMyCards[i] != iMyCards[i + 1] && iMyCards[i] < 14)
+		{
+			iSingle++;
+			//有顺子，检查单牌是否在顺子中
+
+			for (int j = 0; j < 9; j = j + 3)//iStraight数组的格式为 顺子起点，顺子结点，0，顺子起点，顺子结点，0
+			{
+				if (iStraight[j] != 0)
+				{
+					if (iMyCards[i] >= iStraight[j] && iMyCards[i] <= iStraight[j + 1])//如果单牌在顺子中 单牌--
+					{
+						iSingle--;
+					}
+				}
+			}
+		}
+	}
+
+	for (int j = 0; j < 9; j = j + 3)//iStraight数组的格式为 顺子起点，顺子结点，0，顺子起点，顺子结点，0
+	{
+		if (iStraight[j] != 0)
+		{
+				for (int k = 0; k < 9; k++)
+				{
+					if (iPair[k] != 0 && iPair[k] >= iStraight[j] && iPair[k] <= iStraight[j + 1])//如果对子在顺子中，单牌++
+					{
+						iSingle++;
+					}
+				}
+		}
+	}*/
+	
+
 	//牌力的计算
 	for (int i = 0; i < 17; i++)
 	{
@@ -219,32 +259,18 @@ int CallNum::CardForce(int iCards[])
 			}
 		}
 
-		//大王计2个牌力
-		if (iMyCards[i] == 99)
-		{
-			iForce += 2;
-		}
-		//小王计1个牌力
-		if (iMyCards[i] == 66)
+		//QQ,KK,AA牌力值加1
+		if (i < 9 && iPair[i] >=12&&iPair[i]!=22)
 		{
 			iForce += 1;
 		}
 
-		//一对2计1个牌力
-		if (i < 9 && iPair[i] == 2)
-		{
-			iForce += 1;
-		}
 		//3张J及以上计1个牌力
-		if (i < 6 && iThree[i] > 10)
+		if (i < 6 && iThree[i] > 10&& iThree[i]!=22)
 		{
 			iForce += 1;
-			//3张2加计2个牌力
-			if (iThree[i] == 22)
-			{
-				iForce += 2;
-			}
 		}
+
 		//顺子计1到2个牌力
 		if (i < 9 && iStraight[i + 1] != 0 && iStraight[i] != 0)
 		{
@@ -260,11 +286,6 @@ int CallNum::CardForce(int iCards[])
 
 	}
 
-	//进手张大于掉张，掉张被容易带走  
-	if (iEntry > iSingle)
-	{
-		iForce += 1;
-	}
 	//进手张小于掉张,掉张不易被带走
 	if (iEntry < iSingle)
 	{
@@ -272,6 +293,12 @@ int CallNum::CardForce(int iCards[])
 		iForce -= iTemp;
 	}
 
+	//如果单牌数小于3，增加牌力值
+	if (iSingle < 3)
+	{
+		iForce +=3 - iSingle;
+	}
+	cout << " SingleNumber " << iSingle << endl;
 	return iForce;
 }
 
@@ -314,29 +341,39 @@ int CallNum::CallCardAnalyze(Ddz* pDdz)
 		iHeadCallPointSecond = pDdz->iBid[1];//上家叫牌点数
 	}
 
+	int bomb=0;
+	int one=0;
 	//牌点判断
 	for (int i = 0; i<17; i++)
 	{
-		if (pDdz->iOnHand[i] >= 44)
-		{
-			iInHand = pDdz->iOnHand[i];
-			if (iInHand >= 53)
-				iPip += 4;
-			else if (iInHand >= 52)
-				iPip += 3;
-			else if (iInHand >= 48)
-				iPip += 2;
-			else
-				iPip += 1;
-		}
+		iInHand = pDdz->iOnHand[i];
+		if (iInHand >= 53)		//大王
+			//iPip += 3;
+			bomb += 2;
+		else if (iInHand >= 52)	//小王
+			bomb += 1;
+		else if (iInHand >= 48)	//2
+			iPip++;
+		else if (iInHand >= 44)
+			one++;
 	} 
 
+	if (bomb == 3)
+		iPip += 7;
+	if (bomb == 1)
+		iPip += 2;
+	if (bomb == 2)
+		iPip += 3;
+	if (one >= 2)
+		iPip++;
+
 	//叫牌分析
-	//叫牌的基本条件需满足6个牌点
-	if (iPip > 5)
+	//叫牌的基本条件需满足4个牌点
+	if (iPip >=4)
 	{
 		int iPipNum = CardForce(pDdz->iOnHand) + iPip;
-
+		//Test
+		cout << "Card Force: " << iPipNum-iPip << " 牌点值： " << iPip << " iPipNum " << iPipNum << endl;
 		if (iHeadCallPointFirst == -1 && iHeadCallPointSecond == -1)
 		{
 			if (iPipNum > 11)
@@ -438,10 +475,16 @@ int CallNum::CallCardAnalyze(Ddz* pDdz)
 		}
 	}
 	else
+	{
+		int iPipNum = CardForce(pDdz->iOnHand) + iPip;
+		//Test
+		cout << "Card Force: " << iPipNum - iPip << " 牌点值： " << iPip << " iPipNum " << iPipNum << endl;
 		iCallPoint = 0;
+	}
+		
 
 
-	//判断是否有2和王，叫三分的前提，至少要有1个王，2个二
+	//判断是否有2和王，叫三分的前提，至少要有1个王，2个二 或者两个王一个二
 	int j = 0,k=0;
 	if (iCallPoint == 3)
 	{
@@ -449,15 +492,19 @@ int CallNum::CallCardAnalyze(Ddz* pDdz)
 		{
 			if (pDdz->iOnHand[i]/4==12) 
 			{
-				j++;
+				j++;//2
 			}
 			else if (pDdz->iOnHand[i] / 4 == 13)
 			{
-				k++;
+				k++;//王
 			}
 		}
 		if (j < 2 || k < 1) {
 			iCallPoint = 2;
+		}
+		if (j >= 1 && k == 2)
+		{
+			iCallPoint = 3;
 		}
 	}
 

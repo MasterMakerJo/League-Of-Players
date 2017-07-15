@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "CardsInfo.h"
+#include"SplitCard.h"
 
 class CallNum
 {
@@ -14,6 +15,7 @@ public:
 	CardsInfo* CInfo;
 	int CardForce(int iCards[]);
 	int CallCardAnalyze(Ddz* pDdz);
+	SplitCard *pSplitCards;						//≤≈∆¿‡±‰¡ø
 };
 
 #endif _CallNum

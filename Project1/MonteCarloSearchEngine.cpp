@@ -199,7 +199,7 @@ void printt(int*temp) {
 			cout << " 大王 ";   //大王
 		}
 	}
-	cout << "  ，，";
+	cout << ",";
 }
 //开始搜索
 void MonteCarloSearchEngine::SearchAGoodMove(Ddz *pDdz)

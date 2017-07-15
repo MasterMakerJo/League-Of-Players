@@ -140,6 +140,31 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 				former[i - 34] = out[i];
 			}
 		}
+		/*for (int i = 0; i < 18; i++)
+		{
+			cout << "us[" << i << "]=" << i << ";" << endl;
+		}*/
+		/*us[0] = 4;
+		us[1] = 5;
+		us[2] = 9;
+		us[3] = 13;
+		us[4] = 12;
+		us[5] = 16;
+		us[6] = 20;
+		us[7] = 21;
+		us[8] = 24;
+		us[9] = 28;
+		us[10] = 29;
+		us[11] = 36;
+		us[12] = 40;
+		us[13] = 41;
+		us[14] = 44;
+		us[15] = 45;
+		us[16] = 53;
+		us[17] = -1;*/
+
+
+
 
 		//用冒牌排序给三家的牌排个序
 		for (int pass = 17,j; pass >0; pass--)
@@ -360,11 +385,11 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 			{
 				if (result[j][i] != -2)
 				{
-					cout << result[j][i] / 4 + 3;
+					cout << result[j][i] / 4 + 3<<" ";
 				}
 				else
 				{
-					cout << " , ";
+					cout << ",";
 				}
 			}
 			cout << endl << endl;

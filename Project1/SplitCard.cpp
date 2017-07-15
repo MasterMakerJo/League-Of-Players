@@ -639,7 +639,7 @@ void SplitCard::judgeLinkThree()
 	int iLinkIndex[8];//记录相领的三条在iLinkThree数组的下标；
 	int iLinkCount= 0;
 
-	if (iThree[4] == -1)//如果只有一个三条或者没有三条，返回；
+	if (iThree[4] == -1||iThree[4]==0)//如果只有一个三条或者没有三条，返回；
 	{
 		iLinkThree[0] = -1;
 		return;
@@ -696,46 +696,64 @@ void SplitCard::judgeLinkThree()
 
 
 void SplitCard::OptimizeLinkSingle() {
-	judgeLinkSingle();
-	
+
+	judgeSingle();
+
 	int iLinkIndex[10];
-	int j = 0;
-	for (int i = 0; iLinkSingle[i] != -1; i++)
+	int j = 1, i = 0;
+	iLinkIndex[0] = 0;
+
+	//记录单顺首尾下标
+	for (i; iLinkSingle[i] != -1; i++)
 	{
 		if (iLinkSingle[i] == -2)
 		{
 			iLinkIndex[j] = i - 1;
 			iLinkIndex[j + 1] = -2;
-			j++;
+			if (iLinkSingle[i + 1] != -1)
+			{
+				iLinkIndex[j + 2] = i + 1;
+				j = j + 3;
+			}
+			else
+			{
+				j = j + 2;
+				iLinkIndex[j] = -1;
+			}
+
 		}
 	}
-	iLinkIndex[j] = -1;
+	//	iLinkIndex[j] = -1;
 	judgeThree();
-	for (int i = 0; iLinkIndex[i] != -1; i = i + 3)
+	if (iLinkSingle[0] != -1)
 	{
-		for (int k = 0; iThree[k] != -1; k = k + 4)
+		for (int i = 0; iLinkIndex[i] != -1; i = i + 3)
 		{
-			if ((iLinkIndex[i + 1] - iLinkIndex[i]) > 5 && iLinkSingle[iLinkIndex[i]] == iThree[k])
+			for (int k = 0; iThree[k] != -1; k = k + 4)
 			{
-				int j = iLinkIndex[i];
-				for (j; iLinkSingle[j] != -1; j++)
+				if ((iLinkIndex[i + 1] - iLinkIndex[i]) > 5 && iLinkSingle[iLinkIndex[i]] / 4 == iThree[k] / 4)
 				{
-					iLinkSingle[j] = iLinkSingle[j + 1];
+					int j = iLinkIndex[i];
+					for (j; iLinkSingle[j] != -1; j++)
+					{
+						iLinkSingle[j] = iLinkSingle[j + 1];
+					}
+					iLinkSingle[j] = -1;
 				}
-				iLinkSingle[j] = -1;
-			}
-			if ((iLinkIndex[i + 1] - iLinkIndex[i]) > 5 && iLinkSingle[iLinkIndex[i + 1]] == iThree[k])
-			{
-				int j = iLinkIndex[i + 1];
-				for (j; iLinkSingle[j] != -1; j++)
+				if ((iLinkIndex[i + 1] - iLinkIndex[i]) > 5 && iLinkSingle[iLinkIndex[i + 1]] / 4 == iThree[k] / 4)
 				{
-					iLinkSingle[j] = iLinkSingle[j + 1];
+					int j = iLinkIndex[i + 1];
+					for (j; iLinkSingle[j] != -1; j++)
+					{
+						iLinkSingle[j] = iLinkSingle[j + 1];
+					}
+					iLinkSingle[j] = -1;
 				}
-				iLinkSingle[j] = -1;
 			}
 		}
 	}
 }
+
 //判断单牌（合格）
 void SplitCard::judgeSingle()
 {
@@ -810,8 +828,8 @@ int** SplitCard::startSplitCard(int iInitCards[])
 	judgeRepeat();//搜索重牌
 	judgeRocket();//判断火箭
 	judgeBomb();//判断炸弹
-	judgeLinkSingle();//判断单顺
-	//OptimizeLinkSingle();
+	//judgeLinkSingle();//判断单顺
+	OptimizeLinkSingle();
 	judgeDouble();//判断对牌
 	judgeLinkDouble();//判断双顺
 	judgeThree();//判断三条
@@ -852,8 +870,8 @@ int* SplitCard::startSplitCard(int iInitCards[], int type)
 		judgeLinkThree();//判断三顺
 		return iLinkThree;
 	case 4:
-		judgeLinkSingle();//判断单顺
-		//OptimizeLinkSingle();
+		//judgeLinkSingle();//判断单顺
+		OptimizeLinkSingle();
 		return iLinkSingle;
 	case 5:
 		judgeLinkDouble();//判断双顺
