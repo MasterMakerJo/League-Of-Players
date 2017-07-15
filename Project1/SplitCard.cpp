@@ -633,8 +633,8 @@ void SplitCard::judgeThree()
 //判断三顺
 void SplitCard::judgeLinkThree()
 {
-	judgeThree();
-	int iIndex = 0;
+	judgeThree();//先将三条放进iThree里
+	int iIndex = 0;//iLinkThree的下标
 
 	int iLinkIndex[8];//记录相领的三条在iLinkThree数组的下标；
 	int iLinkCount= 0;
@@ -646,23 +646,23 @@ void SplitCard::judgeLinkThree()
 	}
 	else 
 	{
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)//初始化数组
 		{
 			iLinkIndex[i] = -1;
 		}
 		//012,3,456,7,8910,11,121314,15
-		for (int i = 4; iThree[i]!=-1 ; i=i+4)
+		for (int i = 4; iThree[i]!=-1 ; i=i+4)//每个三条在iThree中开始的下标为0，4，8，12...
 		{
-			if (iThree[i - 4] / 4 + 1 == iThree[i]/4)
+			if (iThree[i - 4] / 4 + 1 == iThree[i]/4)//如果两个三条开始的下标相差1，即是三顺
 			{
-				if (iLinkCount == 0) 
+				if (iLinkCount == 0)			//如果还没有记录过三顺的下标
 				{
 					iLinkIndex[iLinkCount++] = i - 4;
 					iLinkIndex[iLinkCount++] = i;
 				}
 				else
 				{
-					if (iLinkIndex[iLinkCount - 1] == i - 4)
+					if (iLinkIndex[iLinkCount - 1] == i - 4)//如果是连续的三顺，例如3334444  444555联合起来变成333444555
 					{
 						iLinkIndex[iLinkCount++] = i;
 					}
@@ -678,7 +678,7 @@ void SplitCard::judgeLinkThree()
 		}
 	}
 	
-	for (int i = 0; iLinkIndex[i]!=-1; i++)
+	for (int i = 0; iLinkIndex[i]!=-1; i++) //用记录的下标读取iThree中牌的编码存进iLinkThree中
 	{
 		if (iLinkIndex[i] != -2)
 		{
@@ -691,61 +691,6 @@ void SplitCard::judgeLinkThree()
 			iLinkThree[iIndex++] = -2;
 		}
 	}
-
-	
-	/*int iIndex = 0;
-	int iThreeValue = 0;
-	int iLastWaitOrderIndex = -1;
-
-	//初始化WaitOrder
-	for (int k = 1; k < 26; k += 2)
-	{
-		if (iRepeat[k] >= 3)
-		{
-			iThreeValue = iRepeat[k - 1];
-			for (int l = 0; iMyCards[l] != -1; l++)
-			{
-				if (iThreeValue == iMyCards[l])
-				{
-					iWaitOrder[l] = iMyCards[l];
-					iLastWaitOrderIndex = l + 1;
-					break;
-				}
-			}
-		}
-	}
-	if (iLastWaitOrderIndex == -1)
-	{
-		iLastWaitOrderIndex = 1;
-	}
-	iWaitOrder[iLastWaitOrderIndex] = -1;
-
-	judgeLink(2);
-
-	for (int i = 0; iLinkIndex[i] != -1; i++)
-	{
-		if (iLinkIndex[i] != -2)
-		{
-			for (int j = 0; iMyCards[j] != -1; j++)
-			{
-				if (iMyCards[iLinkIndex[i]] == iMyCards[j])
-				{
-					iLinkThree[iIndex] = iCards[j];
-					iIndex++;
-					iLinkThree[iIndex] = iCards[j + 1];
-					iIndex++;
-					iLinkThree[iIndex] = iCards[j + 2];
-					iIndex++;
-					break;
-				}
-			}
-		}
-		else
-		{
-			iLinkThree[iIndex] = -2;
-			iIndex++;
-		}
-	}*/
 	iLinkThree[iIndex] = -1;
 }
 
