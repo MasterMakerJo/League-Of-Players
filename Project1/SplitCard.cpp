@@ -697,13 +697,14 @@ void SplitCard::judgeLinkThree()
 
 void SplitCard::OptimizeLinkSingle() {
 
-	judgeSingle();
+	judgeLinkSingle();
 
 	int iLinkIndex[10];
 	int j = 1, i = 0;
 	iLinkIndex[0] = 0;
-
-	//记录单顺首尾下标
+	//				0 1 2  3  4  5  6  7  8 9 10  11  12...
+	//记录单顺首尾下标 1 2 3  4  5  -2  6  7  8 9 10  -2  -1
+	//	iLinkIndex	0 4 -2 6  10 -2  -1
 	for (i; iLinkSingle[i] != -1; i++)
 	{
 		if (iLinkSingle[i] == -2)
@@ -723,35 +724,43 @@ void SplitCard::OptimizeLinkSingle() {
 
 		}
 	}
+
 	//	iLinkIndex[j] = -1;
 	judgeThree();
-	if (iLinkSingle[0] != -1)
+	//				0 1 2  3  4  5  6  7  8 9 10  11  12...
+	//记录单顺首尾下标 1 2 3  4  5  6  -2 7  8 9 10  11  12 -2  -1
+	//	iLinkIndex	0 5 -2 7  12 -2  -1
+	if (iLinkSingle[0] != -1)//如果有一个顺子及以上
 	{
 		for (int i = 0; iLinkIndex[i] != -1; i = i + 3)
 		{
 			for (int k = 0; iThree[k] != -1; k = k + 4)
 			{
-				if ((iLinkIndex[i + 1] - iLinkIndex[i]) > 5 && iLinkSingle[iLinkIndex[i]] / 4 == iThree[k] / 4)
+				if (iLinkSingle[iLinkIndex[i + 1]] / 4 - iLinkSingle[iLinkIndex[i]] / 4 >= 5)//首
 				{
-					int j = iLinkIndex[i];
-					for (j; iLinkSingle[j] != -1; j++)
+					if ( iLinkSingle[iLinkIndex[i]] / 4 == iThree[k] / 4)//如果六顺及以上的首位包含了三条，删掉
 					{
-						iLinkSingle[j] = iLinkSingle[j + 1];
+						for (int j = iLinkIndex[i]; iLinkSingle[j] != -1; j++)
+						{
+							iLinkSingle[j] = iLinkSingle[j + 1];//去掉下标为 iLinkIndex[i]的牌编码
+						}
+						iLinkIndex[i + 1]--;
 					}
-					iLinkSingle[j] = -1;
-				}
-				if ((iLinkIndex[i + 1] - iLinkIndex[i]) > 5 && iLinkSingle[iLinkIndex[i + 1]] / 4 == iThree[k] / 4)
-				{
-					int j = iLinkIndex[i + 1];
-					for (j; iLinkSingle[j] != -1; j++)
+					else if ( iLinkSingle[iLinkIndex[i + 1]] / 4 == iThree[k] / 4)//尾
 					{
-						iLinkSingle[j] = iLinkSingle[j + 1];
+						
+						for (int j = iLinkIndex[i + 1]; iLinkSingle[j] != -1; j++)
+						{
+							iLinkSingle[j] = iLinkSingle[j + 1];//去掉下标为 iLinkIndex[i+1]的牌编码
+						}
+						iLinkIndex[i + 1]--;
 					}
-					iLinkSingle[j] = -1;
 				}
+				
 			}
 		}
 	}
+
 }
 
 //判断单牌（合格）
@@ -759,7 +768,8 @@ void SplitCard::judgeSingle()
 {
 	int iIndex = 0;
 
-	judgeLinkSingle();
+	//judgeLinkSingle();
+	OptimizeLinkSingle();
 	int iCopyCards[21];//复制iCard;
 
 	int i = 0;

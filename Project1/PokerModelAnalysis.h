@@ -1,4 +1,3 @@
-#include "String.h"
 #include <iostream>
 #include "math.h"
 #include <algorithm>
@@ -11,6 +10,7 @@
 using namespace std;
 class PokerModelAnalysis
 {
+
 public:
 	PokerModelAnalysis();
 	~PokerModelAnalysis();
@@ -62,7 +62,7 @@ public:
 	void Fendipai();
 	void DeleteC();
 
-	void Gailvbiao(int *Buffer);/*概率表的初始化*/
+	void Gailvbiao(int *Out, int p);/*概率表的初始化*/
 	void Change(int *iCs,int t);/*概率表的变化*/
 	
 };

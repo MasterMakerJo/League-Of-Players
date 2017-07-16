@@ -51,9 +51,11 @@ public:	BoardMessageControl();
 	
 	CardsInfo* CInfo; //在InitTurn中被初始化
 	MonteCarloSearchEngine *engine;//在InitTurn中被初始化
+
+	PokerModelAnalysis*Pma;
+
 	char cUpPlayer;
 	char cDownPlayer;
 
-	//int otherPlayerCards[54];
 };
 

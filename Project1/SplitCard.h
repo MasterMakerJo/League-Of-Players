@@ -2,7 +2,6 @@
 #define _SplitCard
 #include <stdio.h>
 #include <stdlib.h>
-#include "String.h"
 #include<iostream>
 using namespace std;
 

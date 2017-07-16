@@ -11,7 +11,8 @@ int who2 = 0;
 using namespace std;
 BoardMessageControl::BoardMessageControl()
 {
-
+	//Test
+	Pma = new PokerModelAnalysis();
 }
 
 
@@ -144,16 +145,16 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 		{
 			cout << "us[" << i << "]=" << i << ";" << endl;
 		}*/
-		/*us[0] = 4;
-		us[1] = 5;
-		us[2] = 9;
-		us[3] = 13;
-		us[4] = 12;
-		us[5] = 16;
-		us[6] = 20;
-		us[7] = 21;
-		us[8] = 24;
-		us[9] = 28;
+		/*us[0] = 0;
+		us[1] = 1;
+		us[2] = 2;
+		us[3] = 4;
+		us[4] = 8;
+		us[5] = 12;
+		us[6] = 16;
+		us[7] = 20;
+		us[8] = 21;
+		us[9] = 22;
 		us[10] = 29;
 		us[11] = 36;
 		us[12] = 40;
@@ -161,9 +162,11 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 		us[14] = 44;
 		us[15] = 45;
 		us[16] = 53;
-		us[17] = -1;*/
+		us[17] = -1;
 
-
+		out[51] = 50;
+		out[52] = 51;
+		out[53] = 52;*/
 
 
 		//用冒牌排序给三家的牌排个序
@@ -312,7 +315,7 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 
 			who = 1;
 			who2 = 1;
-
+			Pma->Gailvbiao(out, 2);
 		
 			
 		}
@@ -333,7 +336,7 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 			latter[19] = out[53];
 			who = 2;
 			who2 = 2;
-			
+			Pma->Gailvbiao(out, 3);
 		}
 		else if (formerbid >= aiBid && formerbid >= latterbid) {
 			strcpy(pDdz->sCommandIn, "LEFTOVER A");
@@ -351,6 +354,7 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 			former[19] = out[53];
 			who = 0;
 			who2 = 0;
+			Pma->Gailvbiao(out, 1);
 		}
 
 		
@@ -370,6 +374,7 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 
 		SplitCard *pSplitCards = new SplitCard();
 		int **result = pSplitCards->startSplitCard(pDdz->iOnHand);
+
 		//cout << " Rocket ";
 		for (int j = 0; j<8; j++)
 		{
@@ -659,6 +664,8 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 				AnalyzeMsg(pDdz);		//分析处理信息
 				OutputMsg(pDdz);		//输出信息
 					who = 1;
+					Pma->Change(outOfHand, 1);
+
 			}
 			else if (who == 1) {
 
@@ -927,7 +934,7 @@ void BoardMessageControl::InputMsg(struct Ddz * pDdz)
 					//cout << " MSGtoAI " << pDdz->sCommandIn << endl;
 					AnalyzeMsg(pDdz);		//分析处理信息
 					OutputMsg(pDdz);		//输出信息
-
+					Pma->Change(outOfHand, 2);
 					who = 0;
 				}
 				

@@ -1,6 +1,7 @@
 #include "PokerModelAnalysis.h"
 
 
+
 void PokerModelAnalysis::Init()//初始化
 {
 	UpWrong = 0;
@@ -37,11 +38,8 @@ PokerModelAnalysis::~PokerModelAnalysis()////析构函数
 void PokerModelAnalysis::GetOtherPokersCards(int *iUpCards, int *iDownCards, Ddz *pDdz)////获得其他玩家的牌
 {
 	pMyDdz = pDdz;////指针，我的指针
-
-	int temp[18];//除去底牌
-
 	Init();////调用初始化那个函数，将改建立的数组进行全元素为－1的初始化
-	if (pMyDdz->iOTmax <= 2)//当前出牌手`数小于2
+	if (pMyDdz->iOTmax <= 2)//当前出牌手数小于2
 	{
 		GameStart();////调用两个函数，一个是用来模拟，一个是真实的对手模型
 		Gaming();
@@ -62,29 +60,6 @@ void PokerModelAnalysis::GetOtherPokersCards(int *iUpCards, int *iDownCards, Ddz
 
 void PokerModelAnalysis::GameStart()
 {
-	//CardsValue(Hc);
-	//int size = sizeof(iUtimate);
-	//int i = 0;
-	//memcpy(iMyUtimate, iUtimate, size);
-	//if (i = 0)
-	//{
-	//	if (InitialSum > Standard2)//牌力值大于标准值2就是好牌
-	//	{
-	//		LordBest();
-	//	}
-	//	if (InitialSum >= Standard1 && InitialSum <= Standard2)//牌力值介于标准值1和标准值2之间就是一般的牌
-	//	{
-	//		Equality();
-	//	}
-	//	else
-	//	{
-	//		PartnerBest();
-	//	}
-	//}
-	//else//烂牌
-	//{
-	//	Equality();
-	//}
 	for (int i = 0; i < 21; i++)////还是循环，循环两家必有的牌，将初值全都赋为－1
 	{
 		iOneDe[i] = -1;////上家必有得牌
@@ -132,7 +107,7 @@ void PokerModelAnalysis::Analysis(int t)
 		}
 		if (B->IsType1Rocket(iCs) == 1)
 		{
-			DeleteB(iCs, 1);/*???*/
+			DeleteB(iCs, 1);
 			Type1(iCs, 2);
 			return;
 		}
@@ -905,8 +880,9 @@ void PokerModelAnalysis::DeleteB(int *iCs, int a)
 					j = 0;
 				}
 			}
-		}
+		}	
 	}
+
 }
 
 void PokerModelAnalysis::Fendipai()
@@ -990,102 +966,150 @@ void PokerModelAnalysis::DeleteC()
 }
 
 
-/**
-*  作者：祝瑾如  2017.7.12
-*  初始化概率表
-*/
-void PokerModelAnalysis::Gailvbiao(int *Buffer)/*概率表的初始化*/
+
+void PokerModelAnalysis::Gailvbiao(int *Out,int p)/*概率表的初始化*/
 {
 	/*共15张牌，3,4,5,6,7,8,9,10,J,Q,K,A,2,小王,大王。共0,1,2,3,4五种情况。*/
-	
-	int One[15] = { 0 };/*One为上家,存储除底牌外牌的张数*/
-	int Dipai[15] = {0};/*装三张底牌,下标是底牌，值为底牌的张数*/
-	int n; /*n为总张数=底牌+Buffer*/
 
-	 /*计算buffer中分别多少张*/
-	for (int i1 = 0; i1 < 34/*Buffer[i1]!=-1*/; i1++)
+	int One[15] = {0};/*存储除去底牌和AI手牌后的其他牌张数，给One[0]第一个赋0，后面自动赋0*/
+	int Dipai[15] = {0};/*装三张底牌,下标是底牌，值为底牌的张数*/
+	int n; /*总张数n=底牌+one*/
+
+	 /*计算其他牌每个牌分别多少张*/
+	for (int i1 = 17; i1 < 51; i1++)
 	{
-		int j1;
-		j1 = Buffer[i1] / 4;
-		if (Buffer[i1] ==52) 
+		/*因为大王小王除以4后值相同，所以分开计算*/
+		if (Out[i1] ==52) 
 		{
-			One[13]++;
+			One[13]+=1;
 		}
-		if (Buffer[i1] == 53)
+		if (Out[i1] == 53)
 		{
-			One[14]++;
+			One[14]+=1;
 		}
 		else
 		{
+			int j1;
+			j1 = Out[i1] / 4;
 	      One[j1]++;
 		}
 	}
 
 	/*计算底牌分别多少张*/
-		for (int j2 = 0; j2< 3; j2++)
+		for (int j2 = 51; j2<54; j2++)
 		{
-			int i2 = pMyDdz->iLef[j2] / 4;
-			if (pMyDdz->iLef[j2] ==52)
+			if (Out[j2]==52)
 			{
 				Dipai[13]++;
 			}
-			if (pMyDdz->iLef[j2] == 53)
+			if (Out[j2] == 53)
 			{
 				Dipai[14]++;
 			}
 			else
 			{
+				int i2 = Out[j2]/4;
 				Dipai[i2]++;
 			}
 		}
 
-
-	if (pMyDdz->cLandlord + 1 == pMyDdz->cDir) /*地主是上家*/
-	{
+		if (p == 1) /*地主是上家*/
+		{
 			/*概率表初始化*/
-			for (int i3 = 0; i3<15; i3++)
+			for (int i3 = 0; i3 < 15; i3++)
 			{
-				n = One[i3]+Dipai[i3];
+				n = One[i3] + Dipai[i3];
 				int d = Dipai[i3];
 				for (int j3 = 0; j3 < 5; j3++)
 				{
-					if (j3 <= n)
+					if (One[i3] == 0) /*其他牌为0*/
 					{
-						if (j3==d&&j3!=0) 
-					{
-							BiaoA[i3][j3] = 0.85;/*把底牌张数的概率设为0.85*/
-						}
-						if (j3<d) 
+						if (d == 0)/*底牌和其他牌均为0，则将AB概率表中此行张数为0的概率设为1，其他张数为0*/
 						{
-							BiaoA[i3][j3] = 0;
+							if (j3 == 0)
+							{
+								BiaoA[i3][j3] = 1;
+								BiaoB[i3][j3] = 1;
+							}
+							else if (j3 != 0)
+							{
+								BiaoA[i3][j3] = 0;
+								BiaoB[i3][j3] = 0;
+							}
 						}
-						else
-						{
-							BiaoA[i3][j3] = 0.5;
-						}
-						BiaoB[i3][j3 - Dipai[i3]] = 0.5;
-						if (One[i3] = 0)/*如果buffer中牌数等于0，即底牌中张数等于总牌数*/
+						else if (d != 0) /*其他牌为0但底牌不为0，则将表A此行底牌张数的概率设为1，其他张数及表B设为0*/
 						{
 							BiaoA[i3][j3] = 1;
 							BiaoB[i3][j3] = 0;
 						}
-						}
-					else
-					{
-						BiaoA[i3][j3] = 0;
-						BiaoB[i3][j3] = 0;
 					}
+					else if (One[i3] != 0)/*其他牌不为0*/
+					{
+						if (d == 0)/*其他牌不为0但底牌为0，则表AB小于此行其他牌张数的所有张数概率设为0.5，其他设为0*/
+						{
+							if (j3 <= One[i3])
+							{
+								BiaoA[i3][j3] = 0.5;
+								BiaoB[i3][j3] = 0.5;
+							}
+							else
+							{
+								BiaoA[i3][j3] = 0;
+								BiaoB[i3][j3] = 0;
+							}
+						}
+						else if (d != 0) /*其他牌不为0且底牌不为0*/
+						{
+							if (j3 <= n)/*在此情况下初始化表A的概率*/
+							{
+								if (j3 == d) /*把底牌张数的概率设为0.85*/
+								{
+									BiaoA[i3][j3] = 0.85;
+								}
+								if (j3 < d)/*把小于底牌张数的概率设为0*/
+								{
+									BiaoA[i3][j3] = 0;
+								}
+								if (j3 > d) /*把大于底牌张数且小于总张数的概率设为0.5*/
+								{
+									BiaoA[i3][j3] = 0.5;
+								}
+							}
+							if (j3 <= One[i3])/*在此情况下初始化表B的概率表*/
+							{
+								BiaoB[i3][j3] = 0.5;/*在表B中把此行小于等于其他牌的概率设为0.5*/
+							}
+							if (j3>One[i3])
+							{
+								BiaoB[i3][j3] = 0;/*在表B中把此行大于其他牌的概率设为0*/
+							}
+						}
 					}
 				}
 			}
+		}
 
-	if (pMyDdz->cLandlord == pMyDdz->cDir)/*地主是“我”*/
+	if (p==2)/*地主是AI*/
 	{
 		for (int i4 = 0; i4<15; i4++)
 		{
 			for (int j4 = 0; j4 < 5; j4++)
 			{
-				if (j4 <= One[i4])
+				if (One[i4]==0) 
+				{
+					if (j4==0)
+					{
+						BiaoA[i4][j4] = 1;
+						BiaoB[i4][j4] = 1;
+					}
+					else 
+					{
+						BiaoA[i4][j4] = 0;
+						BiaoB[i4][j4] = 0;
+					}
+				}
+				else
+					if (j4 <= One[i4])
 				{
 					BiaoA[i4][j4] = 0.5;
 					BiaoB[i4][j4] = 0.5;
@@ -1099,315 +1123,562 @@ void PokerModelAnalysis::Gailvbiao(int *Buffer)/*概率表的初始化*/
 		}
 	}
 
-	if (pMyDdz->cLandlord - 1 == pMyDdz->cDir)/*地主是下家*/
+	if (p==3)/*地主是下家*/
 	{
-		for (int i5 = 0; i5<15; i5++)
+		for (int i5 = 0; i5 < 15; i5++)
 		{
 			n = One[i5] + Dipai[i5];
 			int d = Dipai[i5];
 			for (int j5 = 0; j5 < 5; j5++)
 			{
-				if (j5 <= n)
+				if (One[i5] == 0) /*其他牌为0*/
 				{
-					if (d==j5)
+					if (d == 0)/*底牌和其他牌均为0，则将AB概率表中此行张数为0的概率设为1，其他张数为0*/
 					{
-						BiaoB[i5][j5] = 0.85;/*把底牌张数的概率设为0.85*/
+						if (j5== 0)
+						{
+							BiaoA[i5][j5] = 1;
+							BiaoB[i5][j5] = 1;
+						}
+						else if (j5!= 0)
+						{
+							BiaoA[i5][j5] = 0;
+							BiaoB[i5][j5] = 0;
+						}
 					}
-					if (j5<d)
-					{
-						BiaoB[i5][j5] = 0;
-					}
-					else
-					{
-						BiaoB[i5][j5] = 0.5;
-					}
-					BiaoA[i5][j5 - Dipai[i5]] = 0.5;
-					if (One[i5] = 0)/*如果buffer中牌数等于0，即底牌中张数等于总牌数*/
+					else if (d != 0) /*其他牌为0但底牌不为0，则将表A此行底牌张数的概率设为1，其他张数及表B设为0*/
 					{
 						BiaoB[i5][j5] = 1;
 						BiaoA[i5][j5] = 0;
 					}
 				}
-				else
-				{	
-					BiaoB[i5][j5] = 0;
-					BiaoA[i5][j5] = 0;
+				else if (One[i5] != 0)/*其他牌不为0*/
+				{
+					if (d == 0)/*其他牌不为0但底牌为0，则表AB小于此行其他牌张数的所有张数概率设为0.5，其他设为0*/
+					{
+						if (j5<= One[i5])
+						{
+							BiaoA[i5][j5] = 0.5;
+							BiaoB[i5][j5] = 0.5;
+						}
+						else
+						{
+							BiaoA[i5][j5] = 0;
+							BiaoB[i5][j5] = 0;
+						}
+					}
+					else if (d != 0) /*其他牌不为0且底牌不为0*/
+					{
+						if (j5<= n)/*在此情况下初始化表A的概率*/
+						{
+							if (j5 == d) /*把底牌张数的概率设为0.85*/
+							{
+								BiaoB[i5][j5] = 0.85;
+							}
+							if (j5< d)/*把小于底牌张数的概率设为0*/
+							{
+								BiaoB[i5][j5] = 0;
+							}
+							if (j5 > d) /*把大于底牌张数且小于总张数的概率设为0.5*/
+							{
+								BiaoB[i5][j5] = 0.5;
+							}
+						}
+						if (j5<= One[i5])/*在此情况下初始化表B的概率表*/
+						{
+							BiaoA[i5][j5] = 0.5;/*在表B中把此行小于等于其他牌的概率设为0.5*/
+						}
+						if (j5>One[i5])
+						{
+							BiaoA[i5][j5] = 0;/*在表B中把此行大于其他牌的概率设为0*/
+						}
+					}
 				}
 			}
 		}
 	}
+	int Card[16] = {3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
+	//Test
+	cout << "上家的概率表" << endl;
+	cout << "张数\t" << 0 << "\t" << 1 << "\t" << 2 << "\t" << 3 << "\t" << 4 << "\t"<<endl;
+   for (int i6 = 0; i6 < 15;i6++) {
+	   if (Card[i6] == 14)cout << "A" << "\t";
+	   else if(Card[i6] == 15)cout << "2" << "\t";
+	   else if (Card[i6] == 16)cout << "小王" << "\t";
+	   else if (Card[i6] == 11)cout << "J" << "\t";
+	   else if (Card[i6] == 12)cout << "Q" << "\t";
+	   else if (Card[i6] == 13)cout << "K" << "\t";
+	   else if (Card[i6] == 14)cout << "A" << "\t";
+	   else if (Card[i6] == 17)cout << "大王" << "\t";
+	   else cout << Card[i6] << "\t";
+		cout << BiaoA[i6][0] <<"\t"<< BiaoA[i6][1] << "\t" << BiaoA[i6][2] << "\t" << BiaoA[i6][3] << "\t" << BiaoA[i6][4] << endl;
+	}
+    cout <<endl<< "下家的概率表" << endl;
+	cout << "张数\t" << 0 << "\t" << 1 << "\t" << 2 << "\t" << 3 << "\t" << 4 << "\t" << endl;
+    for (int j6 = 0; j6 < 15;j6++) 
+	{
+		if (Card[j6] == 14)cout << "A" << "\t";
+		else if (Card[j6] == 15)cout << "2" << "\t";
+		else if (Card[j6] == 11)cout << "J" << "\t";
+		else if (Card[j6] == 12)cout << "Q" << "\t";
+		else if (Card[j6] == 13)cout << "K" << "\t";
+		else if (Card[j6] == 14)cout << "A" << "\t";
+		else if (Card[j6] == 16)cout << "小王" << "\t";
+		else if (Card[j6] == 17)cout << "大王" << "\t";
+		else cout << Card[j6] << "\t";
+		cout << BiaoB[j6][0] << "\t" << BiaoB[j6][1] << "\t" << BiaoB[j6][2] << "\t" << BiaoB[j6][3] << "\t" << BiaoB[j6][4] << endl;
+	}
 }
 
-/**
-*  作者：祝瑾如  2017.7.12
-*  每次其他玩家出牌后，计算每个玩家手牌的概率
-*/
-void PokerModelAnalysis::Change(int *iCs, int t)/*概率表的变化*/
+void PokerModelAnalysis::Change(int *Count, int t)/*概率表的变化*/
 {
 	int i,j;
 	int a[15] = {0};/*存储此轮出牌的张数*/
-	double g = 0.2;/*概率的变化值*/
+	float g = 0.2;/*概率的变化值*/
 
-	for (int i1 = 0; iCs[i1] != -1; i1++)
+	for (int i1 = 0; Count[i1] != -1; i1++)
 	{
-		for (int j1 = 0; j1<15; j1++)
+		if(Count[i1]==52)
 		{
-			if (iCs[i1] / 4 == j1)
-			{
-				a[j1]++;
-			}
+			a[13]++;
+		}
+		if(Count[i1]==53)
+		{
+			a[14]++;
+		}
+       else{   
+		   int j1= Count[i1] / 4;
+		      a[j1]+=1;
 		}
 	}
 
 	if (t==1) /*上家出牌概率表的变化*/
 	{
-		for (int i2=0;i2<15;i2++)
+		for (int i2 = 0; i2 < 15; i2++)
 		{
-			for (int j2 = 0; BiaoA[i2][j2] !=0|| BiaoB[i2][j2] != 0;j2++)/*分别找到概率表AB中最后一个有值的张数*/
+			if (a[i2] != 0)/*如果未pass即出牌数不等于0*/
 			{
-				if (BiaoA[i2][j2] != 0)
+				for (int j2 = 0; BiaoA[i2][j2] != 0 || BiaoB[i2][j2] != 0; j2++)/*分别找到概率表AB中最后一个有值的张数*/
 				{
-					i = j2;/*找出概率表A中此行的张数最大值*/
-				}
-				if (BiaoB[i2][j2] != 0) 
-				{
-					j = j2;/*找出概率表B中此行的张数最大值*/
-				}
-			}
-
-			if (i== a[i2]) /*出牌数等于概率表A中最大张数*/
-			{
-
-				if(i>=j)/*出牌数等于概率表A中最大张数且A的最大张数大于B的最大张数，A、B此行所有概率修改为0*/
-				{
-			while(i>=0)
-				{
-				BiaoA[i2][i] == 0;
-				BiaoB[i2][i] == 0;
-				i--;
-				}
-			}
-				if (i<j)/*出牌数等于概率表A中最大张数但A的最大张数小于B的最大张数，A此行所有概率修改为0，B的j-i张数改为1,其他改为0*/
-				{
-					int c = j - i;
-					BiaoB[i2][c] = 1;
-					while (i >= 0)
+					if (BiaoA[i2][j2] != 0)
 					{
-						BiaoA[i2][i] == 0;
-						i--;
+						i = j2;/*找出概率表A中此行的张数最大值*/
 					}
-					while (j>= 0)
+					if (BiaoB[i2][j2] != 0)
 					{
-						if (j != c) 
+						j = j2;/*找出概率表B中此行的张数最大值*/
+					}
+				}
+
+				if (i == a[i2]) /*出牌数等于概率表A中最大张数*/
+				{
+					if (i >= j)/*出牌数等于概率表A中最大张数且A的最大张数大于B的最大张数，AB此行张数0的概率改为1，其他概率修改为0*/
+					{
+						for (; i >= 0; i--)
 						{
-							BiaoB[i2][j] = 0;
+							if (i == 0)
+							{
+								BiaoA[i2][i] = 1;
+								BiaoB[i2][i] = 1;
+							}
+							else
+							{
+								BiaoA[i2][i] = 0;
+								BiaoB[i2][i] = 0;
+							}
+						}
+					}
+					if (i < j)/*出牌数等于概率表A中最大张数但A的最大张数小于B的最大张数，A此行所有概率修改为0，B的j-i张数改为1,其他改为0*/
+					{
+						int c = j - i;
+						for (; j >= 0; j--)
+						{
+							if (j <= i)
+							{
+								BiaoA[i2][i] == 0;
+							}
+							if (j == c)
+							{
+								BiaoB[i2][c] = 1;
+							}
+							else
+							{
+								BiaoB[i2][c] = 0;
+							}
 						}
 					}
 				}
-			}
-
-			if (i>a[i2])/*A的出牌数小于概率表A中最大张数*/
-			{
-			 if (i>j)/*A的出牌数小于概率表A中最大张数且A的最大张数大于B的最大张数*/
+				else  if (a[i2] < i)/*A的出牌数小于概率表A中最大张数*/
 				{
-					if (BiaoA[i2][a[i2]]==0.85) /*出牌数恰好等于底牌数，则在剩下的牌中降低概率表A的概率增加概率表B的概率*/
+					if (i > j)/*A的出牌数小于概率表A中最大张数且A的最大张数大于B的最大张数*/
+					{
+						int r = 0;
+						for (int l = 0; l < 5; l++)
+						{
+							if (BiaoA[i2][l] == 0.85)
+								r = l;
+						}
+						/* if (r==0) //如果此行没有底牌且A的出牌数小于概率表A中最大张数且A的最大张数大于B的最大张数
+						 {
+						 因为不可能出现这种情况所以跳过
+						 }*/
+						if (BiaoA[i2][r] == 0.85&&r == a[i2])/*此行有底牌且出牌数恰好等于底牌数，则在剩下的牌中降低概率表A的概率增加概率表B的概率*/
+						{
+							int i3 = i - a[i2];
+							for (int j3 = i3; j3 >= 0; j3--)
+							{
+								if (j3==i3)
+								{
+									BiaoB[i2][i3] += g;
+								}
+								else 
+								{ 
+									BiaoB[i2][j3] -= g; 
+								}
+								if (j3 == 0)
+								{
+									BiaoA[i2][j3] += g;
+								}
+								else
+								{
+									BiaoA[i2][j3] -= 2 * g;/*减2g是因为可能会有if (j3 == a[i2])的情况，此时要确保A剩余张数的概率要小于B剩余张数的概率*/
+								}
+							}
+							for (int j3 = i3+1; j3<5; j3++)
+							{
+								BiaoA[i2][j3] = 0;
+								BiaoB[i2][j3] =0;
+							}
+						}	
+					if (BiaoA[i2][r] == 0.85&& a[i2] < r)/*此行有底牌且出牌数小于底牌*/ 
+					{
+						int i3 = i - a[i2];/*剩下的A的最大值*/
+						int q = r - a[i2];/*剩下的底牌*/
+						/*int p = i - a[i2] - q;//剩下的B的最大值,但此情形下不对概率表B做修改*/
+						for (int j3 =i3; j3 > 0;j3--) 
+						{
+							if (j3==q) 
+							{
+								BiaoA[i2][j3] = 0.85; 
+							}
+							else {
+								BiaoA[i2][j3] -=2*g; 
+							}
+						}
+						for (int j3 = i3 + 1; j3 < 5; j3++) 
+						{
+							BiaoA[i2][j3] = 0;
+						}
+					}
+					if (BiaoA[i2][r] == 0.85&& a[i2] > r) /*此行有底牌且出牌数大于底牌，此时就认为上家手中只有所出张数，因为即使上家手中还剩有手牌要么在后面会出要么概率低于0*/ 
 					{
 						int i3 = i - a[i2];
-						for (int j3=i3;j3>=0;j3--) 
-						{  
-							if (j3 == i3) 
-							{	BiaoA[i2][j3] += g;	}
-							else 
-							{BiaoA[i2][j3] -= g;}
-
-							if (j3 == 0) 
-							{ BiaoA[i2][j3] += g; }
+						for (int j3 = 0; j3 < 5; j3++) 
+							{ 
+							BiaoA[i2][j3] = 0;
+							if (j3==i3&&i3!=0) 
+								{
+									BiaoB[i2][j3] = 1;
+								}
+								else 
+								{
+									BiaoB[i2][j3] = 0;
+								}
+						} 
+					}
+                      }
+					if (i == j) /*A的出牌数小于概率表A中最大张数且A的最大张数等于于B的最大张数*/
+					{
+						int i3 = i - a[i2];
+						for (; i3 >= 0; i3--)
+						{
+							if (i3 == 0)
+							{
+								BiaoA[i2][i3] += g;
+								BiaoB[i2][i3] -= g;
+							}
 							else
-							{	BiaoA[i2][j3] -= g;}
+							{
+								BiaoA[i2][i3] -= g;
+								BiaoB[i2][i3] += g;
+							}
+						}
+					}
 
-							if (j3==a[i2]) 
-							{	BiaoA[i2][j3] -=2*g;}
+					if (i < j)/*A的出牌数小于概率表A中最大张数且A的最大张数小于B的最大张数*/
+					{
+						int r = 0;
+						for (int l = 0; l < 5; l++)
+						{
+							if (BiaoB[i2][l] == 0.85)
+								r = l;
+						}
+					/*	if (r==0) {}//不可能出现此种情况所以不考虑*/
+						if (r != 0)
+						{
+							if (j - a[i2] == r)/*除去A的出牌数后恰好是B拥有的底牌数，除了B的底牌数概率为1后其他AB概率都设为0*/
+							{
+								for (int i4 = 0; i4 < 5; i4++)
+								{
+									if (i4 == 0)
+									{
+										BiaoA[i2][i4] = 1;
+									}
+									else
+									{
+										BiaoA[i2][i4] = 0;
+									}
+									if (i4 == r)
+									{
+										BiaoB[i2][i4] = 1;
+									}
+									else {
+										BiaoB[i2][i4] = 0;
+									}
+								}
+							}
+							else if (j-a[i2]>r) 
+							{
+								int i5 = i - a[i2];/*A出牌后A剩下的牌数，因为j-a[i2]>r所以i5不等于0*/
+								int q = j - a[i2];/*A出牌后B剩下的牌数*/
+								for (int j5 = 0; j5 <5; j5++)
+								{
+									if (j5 == 0) 
+									{ 
+										BiaoA[i2][j5] += g; 
+										BiaoB[i2][j5] -= g;
+									}
+									 if (j5<q&&j5!=0)
+									 {
+										 BiaoB[i2][j5] += g;
+										 if (j5<i5) 
+										 {
+											 BiaoA[i2][j5] -= g;
+										 }
+									 }
+									else {
+										BiaoA[i2][j5] = 0;
+										BiaoB[i2][j5] = 0;
+									}
+								}
+							}
 						}
 					}
 				}
-
-			 if (i == j) /*A的出牌数小于概率表A中最大张数且A的最大张数等于于B的最大张数，说明A是地主*/
-			 {
-				 int i3 = i - a[i2];
-				 for (; i3 >=0; i3--)
-				 {
-					 if (i3==0) 
-					 {
-						 BiaoA[i2][i3] += g;
-						 BiaoB[i2][i3] -= g;
-					 }
-					 else
-					 {
-                     BiaoA[i2][i3] -=g ;
-					 BiaoB[i2][i3] += g;
-					 }
-				 }
-			 }
-
-			 if (i<j)/*A的出牌数小于概率表A中最大张数且A的最大张数小于B的最大张数,说明B是地主*/
-			 {
-				 if (BiaoB[i2][j-a[i2]] ==0.85)/*除去A的出牌数后恰好是B拥有的底牌数，除了B的底牌数概率为1后其他AB概率都设为0*/
-				 {
-					 for (int i4 = 0; i4 >= 0;i4++) 
-					 {
-						 BiaoA[i2][i4] = 0;
-						 if (i4==j-a[i2])
-						 { BiaoB[i2][i4] = 1;}
-						 else
-						 { BiaoB[i2][i4] = 0; }
-					 }
-				 }
-				 else
-				 {
-					 BiaoA[i2][0] += g;
-					 BiaoB[i2][j-a[i2]] += g;
-					 for (int i5 = i - a[i2]; i5 > 0;i5--) 
-					 {
-						 BiaoA[i2][i5] -= g;
-					 }
-					 for (int j5 = i - a[i2]-1; j5 >= 0; j5--)
-					 {
-						 BiaoA[i2][j5] -= g;
-					 }
-				 }
-			 }
 			}
 		}
-	}
+		}
 
-	if (t==2) /*下家出牌概率表的变化*/
+	if (t==2) /*下家出牌概率表的变化,同上家出牌情况*/
 	{
-		for (int i2 = 0; i2<15; i2++)
+		for (int i2 = 0; i2 < 15; i2++)
 		{
-			for (int j2 = 0; BiaoB[i2][j2] != 0 || BiaoA[i2][j2] != 0; j2++)/*分别找到概率表AB中最后一个有值的张数*/
+			if (a[i2] != 0)/*如果未pass即出牌数不等于0*/
 			{
-				if (BiaoB[i2][j2] != 0)
+				for (int j2 = 0; BiaoA[i2][j2] != 0 || BiaoB[i2][j2] != 0; j2++)/*分别找到概率表AB中最后一个有值的张数*/
 				{
-					i = j2;/*找出概率表B中此行的张数最大值*/
-				}
-				if (BiaoA[i2][j2] != 0)
-				{
-					j = j2;/*找出概率表A中此行的张数最大值*/
-				}
-			}
-
-			if (i == a[i2]) /*出牌数等于概率表B中最大张数*/
-			{
-
-				if (i >= j)/*出牌数等于概率表B中最大张数且B的最大张数大于A的最大张数，A、B此行所有概率修改为0*/
-				{
-					while (i >= 0)
+					if (BiaoB[i2][j2] != 0)
 					{
-						BiaoB[i2][i] == 0;
-						BiaoA[i2][i] == 0;
-						i--;
+						i = j2;/*找出概率表B中此行的张数最大值*/
+					}
+					if (BiaoA[i2][j2] != 0)
+					{
+						j = j2;/*找出概率表A中此行的张数最大值*/
 					}
 				}
-				if (i<j)/*出牌数等于概率表B中最大张数但B的最大张数小于A的最大张数，A此行所有概率修改为0，B的j-i张数改为1,其他改为0*/
+
+				if (i == a[i2]) /*出牌数等于概率表B中最大张数*/
 				{
-					int c = j - i;
-					BiaoA[i2][c] = 1;
-					while (i >= 0)
+					if (i >= j)/*出牌数等于概率表B中最大张数且B的最大张数大于A的最大张数，AB此行张数0的概率改为1，其他概率修改为0*/
 					{
-						BiaoB[i2][i] == 0;
-						i--;
-					}
-					while (j >= 0)
-					{
-						if (j != c)
+						for (; i >= 0; i--)
 						{
-							BiaoA[i2][j] = 0;
+							if (i == 0)
+							{
+								BiaoA[i2][i] = 1;
+								BiaoB[i2][i] = 1;
+							}
+							else
+							{
+								BiaoA[i2][i] = 0;
+								BiaoB[i2][i] = 0;
+							}
+						}
+					}
+					if (i < j)/*出牌数等于概率表B中最大张数但B的最大张数小于A的最大张数，B此行所有概率修改为0，A的j-i张数改为1,其他改为0*/
+					{
+						int c = j - i;
+						for (; j >= 0; j--)
+						{
+							if (j <= i)
+							{
+								BiaoB[i2][i] = 0;
+							}
+							if (j == c)
+							{
+								BiaoA[i2][c] = 1;
+							}
+							else
+							{
+								BiaoA[i2][c] = 0;
+							}
 						}
 					}
 				}
-			}
-
-			if (i>a[i2])/*B的出牌数小于概率表B中最大张数*/
-			{
-				if (i>j)/*B的出牌数小于概率表B中最大张数且B的最大张数大于A的最大张数*/
+				else  if (a[i2] < i)/*B的出牌数小于概率表B中最大张数*/
 				{
-					if (BiaoB[i2][a[i2]] == 0.85) /*出牌数恰好等于底牌数，则在剩下的牌中降低概率表B的概率增加概率表B的概率*/
+					if (i > j)/*B的出牌数小于概率表B中最大张数且B的最大张数大于A的最大张数*/
+					{
+						int r = 0;
+						for (int l = 0; l < 5; l++)
+						{
+							if (BiaoB[i2][l] == 0.85)
+								r = l;
+						}
+						/* if (r==0) //如果此行没有底牌且B的出牌数小于概率表B中最大张数且B的最大张数大于A的最大张数
+						{
+						因为不可能出现这种情况所以跳过
+						}*/
+						if (BiaoB[i2][r] == 0.85&&r == a[i2])/*此行有底牌且出牌数恰好等于底牌数，则在剩下的牌中降低概率表B的概率增加概率表A的概率*/
+						{
+							int i3 = i - a[i2];
+							for (int j3 = i3; j3 >= 0; j3--)
+							{
+								if (j3 == i3)
+								{
+									BiaoA[i2][i3] += g;
+								}
+								else
+								{
+									BiaoA[i2][j3] -= g;
+								}
+								if (j3 == 0)
+								{
+									BiaoB[i2][j3] += g;
+								}
+								else
+								{
+									BiaoB[i2][j3] -= 2 * g;/*减2g是因为可能会有if (j3 == a[i2])的情况，此时要确保B剩余张数的概率要小于A剩余张数的概率*/
+								}
+							}
+							for (int j3 = i3 + 1; j3<5; j3++)
+							{
+								BiaoB[i2][j3] = 0;
+								BiaoA[i2][j3] = 0;
+							}
+						}
+						if (BiaoB[i2][r] == 0.85&& a[i2] < r)/*此行有底牌且出牌数小于底牌*/
+						{
+							int i3 = i - a[i2];/*剩下的B的最大值*/
+							int q = r - a[i2];/*剩下的底牌*/
+											  /*int p = i - a[i2] - q;//剩下的A的最大值,但此情形下不对概率表A做修改*/
+							for (int j3 = i3; j3 > 0; j3--)
+							{
+								if (j3 == q)
+								{
+									BiaoB[i2][j3] = 0.85;
+								}
+								else {
+									BiaoB[i2][j3] -= 2 * g;
+								}
+							}
+							for (int j3 = i3 + 1; j3 < 5; j3++)
+							{
+								BiaoB[i2][j3] = 0;
+							}
+						}
+						if (BiaoB[i2][r] == 0.85&& a[i2] > r) /*此行有底牌且出牌数大于底牌，此时就认为上家手中只有所出张数，因为即使上家手中还剩有手牌要么在后面会出要么概率低于0*/
+						{
+							int i3 = i - a[i2];
+							for (int j3 = 0; j3 < 5; j3++)
+							{
+								BiaoB[i2][j3] = 0;
+								if (j3 == i3&&i3 != 0)
+								{
+									BiaoA[i2][j3] = 1;
+								}
+								else
+								{
+									BiaoA[i2][j3] = 0;
+								}
+							}
+						}
+					}
+					if (i == j) /*B的出牌数小于概率表B中最大张数且B的最大张数等于于A的最大张数*/
 					{
 						int i3 = i - a[i2];
-						for (int j3 = i3; j3 >= 0; j3--)
+						for (; i3 >= 0; i3--)
 						{
-							if (j3 == i3)
+							if (i3 == 0)
 							{
-								BiaoB[i2][j3] += g;
+								BiaoB[i2][i3] += g;
+								BiaoA[i2][i3] -= g;
 							}
 							else
 							{
-								BiaoB[i2][j3] -= g;
-							}
-
-							if (j3 == 0)
-							{
-								BiaoB[i2][j3] += g;
-							}
-							else
-							{
-								BiaoB[i2][j3] -= g;
-							}
-
-							if (j3 == a[i2])
-							{
-								BiaoB[i2][j3] -= 2 * g;
+								BiaoB[i2][i3] -= g;
+								BiaoA[i2][i3] += g;
 							}
 						}
 					}
-				}
 
-				if (i == j) /*B的出牌数小于概率表B中最大张数且B的最大张数等于A的最大张数，说明B是地主*/
-				{
-					int i3 = i - a[i2];
-					for (; i3 >= 0; i3--)
+					if (i < j)/*B的出牌数小于概率表B中最大张数且B的最大张数小于A的最大张数*/
 					{
-						if (i3 == 0)
+						int r = 0;
+						for (int l = 0; l < 5; l++)
 						{
-							BiaoB[i2][i3] += g;
-							BiaoA[i2][i3] -= g;
+							if (BiaoA[i2][l] == 0.85)
+								r = l;
 						}
-						else
+						/*	if (r==0) {}//不可能出现此种情况所以不考虑*/
+						if (r != 0)
 						{
-							BiaoB[i2][i3] -= g;
-							BiaoA[i2][i3] += g;
-						}
-					}
-				}
-
-				if (i<j)/*B的出牌数小于概率表B中最大张数且B的最大张数小于A的最大张数,说明A是地主*/
-				{
-					if (BiaoA[i2][j - a[i2]] == 0.85)/*除去B的出牌数后恰好是A拥有的底牌数，除了A的底牌数概率为1后其他AB概率都设为0*/
-					{
-						for (int i4 = 0; i4 >= 0; i4++)
-						{
-							BiaoB[i2][i4] = 0;
-							if (i4 == j - a[i2])
+							if (j - a[i2] == r)/*除去B的出牌数后恰好是A拥有的底牌数，除了A的底牌数概率为1后其他AB概率都设为0*/
 							{
-								BiaoA[i2][i4] = 1;
+								for (int i4 = 0; i4 < 5; i4++)
+								{
+									if (i4 == 0)
+									{
+										BiaoB[i2][i4] = 1;
+									}
+									else
+									{
+										BiaoB[i2][i4] = 0;
+									}
+									if (i4 == r)
+									{
+										BiaoA[i2][i4] = 1;
+									}
+									else {
+										BiaoA[i2][i4] = 0;
+									}
+								}
 							}
-							else
+							else if (j - a[i2]>r)
 							{
-								BiaoA[i2][i4] = 0;
+								int i5 = i - a[i2];/*B出牌后B剩下的牌数，因为j-a[i2]>r所以i5不等于0*/
+								int q = j - a[i2];/*B出牌后A剩下的牌数*/
+								for (int j5 = 0; j5 <5; j5++)
+								{
+									if (j5 == 0)
+									{
+										BiaoB[i2][j5] += g;
+										BiaoA[i2][j5] -= g;
+									}
+									if (j5<q&&j5 != 0)
+									{
+										BiaoA[i2][j5] += g;
+										if (j5<i5)
+										{
+											BiaoB[i2][j5] -= g;
+										}
+									}
+									else {
+										BiaoA[i2][j5] = 0;
+										BiaoB[i2][j5] = 0;
+									}
+								}
 							}
-						}
-					}
-					else
-					{
-						BiaoB[i2][0] += g;
-						BiaoA[i2][j - a[i2]] += g;
-						for (int i5 = i - a[i2]; i5 > 0; i5--)
-						{
-							BiaoB[i2][i5] -= g;
-						}
-						for (int j5 = i - a[i2] - 1; j5 >= 0; j5--)
-						{
-							BiaoB[i2][j5] -= g;
 						}
 					}
 				}
@@ -1421,7 +1692,7 @@ void PokerModelAnalysis::Change(int *iCs, int t)/*概率表的变化*/
 		{
 			if (BiaoA[i6][j6] <= 0) 
 			{
-				BiaoA[i6][j6] <= 0;
+				BiaoA[i6][j6] = 0;
 			}
 			if (BiaoA[i6][j6] >= 1)
 			{
@@ -1429,12 +1700,49 @@ void PokerModelAnalysis::Change(int *iCs, int t)/*概率表的变化*/
 			}
 			if (BiaoB[i6][j6] <= 0)
 			{
-				BiaoB[i6][j6] <= 0;
+				BiaoB[i6][j6] = 0;
 			}
 			if (BiaoB[i6][j6] >= 1)
 			{
 				BiaoB[i6][j6] = 1;
 			}
 		}
+	}
+	//Test
+	int Card[16] = { 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 };
+	
+	
+	
+
+
+	cout << "上家的概率表" << endl;
+	cout << "张数\t" << 0 << "\t" << 1 << "\t" << 2 << "\t" << 3 << "\t" << 4 << "\t" << endl;
+	for (int i6 = 0; i6 < 15; i6++) 
+	{
+			if (Card[i6] == 14)cout << "A" << "\t";
+			else if (Card[i6] == 15)cout << "2" << "\t";
+			else if (Card[i6] == 16)cout << "小王" << "\t";
+			else if (Card[i6] == 11)cout << "J" << "\t";
+			else if (Card[i6] == 12)cout << "Q" << "\t";
+			else if (Card[i6] == 13)cout << "K" << "\t";
+			else if (Card[i6] == 14)cout << "A" << "\t";
+			else if (Card[i6] == 17)cout << "大王" << "\t";
+			else cout << Card[i6] << "\t";
+		cout << BiaoA[i6][0] << "\t" << BiaoA[i6][1] << "\t" << BiaoA[i6][2] << "\t" << BiaoA[i6][3] << "\t" << BiaoA[i6][4] << endl;
+	}
+	cout <<endl<<"下家的概率表" << endl;
+	cout << "张数\t" << 0 << "\t" << 1 << "\t" << 2 << "\t" << 3 << "\t" << 4 << "\t" << endl;
+	for (int j6 = 0; j6 < 15; j6++) 
+	{
+		if (Card[j6] == 14)cout << "A" << "\t";
+		else if (Card[j6] == 15)cout << "2" << "\t";
+		else if (Card[j6] == 11)cout << "J" << "\t";
+		else if (Card[j6] == 12)cout << "Q" << "\t";
+		else if (Card[j6] == 13)cout << "K" << "\t";
+		else if (Card[j6] == 14)cout << "A" << "\t";
+		else if (Card[j6] == 16)cout << "小王" << "\t";
+		else if (Card[j6] == 17)cout << "大王" << "\t";
+		else cout << Card[j6] << "\t";
+		cout << BiaoB[j6][0] << "\t" << BiaoB[j6][1] << "\t" << BiaoB[j6][2] << "\t" << BiaoB[j6][3] << "\t" << BiaoB[j6][4] << endl;
 	}
 }
